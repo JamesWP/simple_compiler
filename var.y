@@ -232,15 +232,6 @@ namespace yy { calc_parser::symbol_type yylex(lexcontext& ctx); }
 
 %type<expression>     expr stmt com_stmt
 %type<expr_list>      stmts
-
-
-var a;
-
-{ var a; }
-
-{ var a; var b;
-
-{ var a; { var b;} }
 %%
 
 go: stmt                     { std::cout << $1 << '\n'; }
