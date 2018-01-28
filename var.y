@@ -51,6 +51,7 @@ struct symbol_table
 
 struct lexcontext
 {
+    int verb = 0;
     const char* cursor;
     yy::location loc;
 
@@ -115,26 +116,26 @@ stmt:
 |   expr ';'                 { $$ = std::move($1); }
 |   "var" IDENTIFIER '=' expr ';'
                              { ctx.defineVar($2, *this); 
-                               $$ = std::move(expression(std::move($2), std::move($4))); }
+                               $$ = expression(std::move($2), std::move($4)); }
 |   "var" IDENTIFIER ';'     { ctx.defineVar($2, *this); 
-                               $$ = std::move(expression(std::move($2), std::move(expression()))); }
-|   "return" expr ';'        { $$ = std::move(expression(ex_type::ret, std::move($2))); }
+                               $$ = expression(std::move($2), expression()); }
+|   "return" expr ';'        { $$ = expression(ex_type::ret, std::move($2)); }
 ;
 
 com_stmt:
     com_stmt stmt            { $$ = std::move($1); $$.push_back(std::move($2)); }
 |   '{'                      { ctx.newScope(); 
-                               $$ = std::move(expr_list()); } 
+                               $$ = expr_list(); } 
 
 expr:
     NUMBERCONST              { $$ = $1; }
 |   IDENTIFIER               { ctx.useVar($1, *this); 
                                $$ = std::move($1);  }
-|   expr '+' expr            { $$ = std::move(expression(std::move($1), std::move($3), op_type::add)); }
-|   expr '-' expr            { $$ = std::move(expression(std::move($1), std::move($3), op_type::minus)); }
-|   expr '*' expr            { $$ = std::move(expression(std::move($1), std::move($3), op_type::multiply)); }
-|   expr '/' expr            { $$ = std::move(expression(std::move($1), std::move($3), op_type::divide)); }
-|   expr '=' expr            { $$ = std::move(expression(std::move($1), std::move($3), op_type::assign)); }
+|   expr '+' expr            { $$ = expression(std::move($1), std::move($3), op_type::add); }
+|   expr '-' expr            { $$ = expression(std::move($1), std::move($3), op_type::minus); }
+|   expr '*' expr            { $$ = expression(std::move($1), std::move($3), op_type::multiply); }
+|   expr '/' expr            { $$ = expression(std::move($1), std::move($3), op_type::divide); }
+|   expr '=' expr            { $$ = expression(std::move($1), std::move($3), op_type::assign); }
 |   '(' expr ')'             { $$ = std::move($2); }
 ;
 
@@ -220,16 +221,20 @@ void yy::calc_parser::error(const location_type& l, const std::string& message)
 
 int main(int argc, char* argv[])
 {
-    if(argc != 2) return 1;
+    if(argc < 2) return 1;
     std::string infile(argv[1]);
     std::ifstream input(infile);
     if(!input)    return 2;
     std::string buffer(std::istreambuf_iterator<char>(input), {});
 
-    std::cout << "input:\n";
-    std::cout << buffer << "\n";
-
     lexcontext ctx;
+
+    if(argc >= 3) ctx.verb = std::atoi(argv[2]); 
+
+    if(ctx.verb > 0){
+      std::cout << "input:\n";
+      std::cout << buffer << "\n";
+    }
 
     ctx.cursor = buffer.c_str();
     ctx.loc.begin.filename = &infile;
