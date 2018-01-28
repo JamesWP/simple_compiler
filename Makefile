@@ -17,6 +17,9 @@ all: $(PROGS)
 %.prog: %.cc
 	$(CXX) $(CXX_FLAGS) "$<" -o "$@"
 
+test: var.prog
+	./var.prog example.var.txt | gcc test.m.c -o example -x assembler-with-cpp - && ./example; echo $$?
+
 clean:
 	rm -rf *.re
 	rm -rf *.prog
