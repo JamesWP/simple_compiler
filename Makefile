@@ -1,8 +1,7 @@
 CXX_FLAGS=-Wall -Wextra -O0 -g -std=c++14 -DYY_NULLPTR=nullptr
 BISON_FLAGS=-t --report=all
 
-PROGS:=$(pathsubst %.y,%.prog,$(wildcard *.y))
-
+PROGS:=var.prog
 re2c=re2c
 
 all: $(PROGS)
@@ -16,8 +15,9 @@ all: $(PROGS)
 	$(re2c) "$<" -o "$@"
 
 %.prog: %.cc
-	g++ $(CXX_FLAGS) "$<" -o "$@"
+	$(CXX) $(CXX_FLAGS) "$<" -o "$@"
 
 clean:
 	rm -rf *.re
 	rm -rf *.prog
+	rm -rf *.cc
