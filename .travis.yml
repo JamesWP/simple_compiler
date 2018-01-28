@@ -5,7 +5,5 @@ services:
 
 before_install:
   - docker build -t compiler-build-test .
-  - docker run -v `pwd`:/src compiler-build-test make clean test
+  - docker run -v `pwd`:/src compiler-build-test sh -c 'cd /src; make clean test'
 
-script:
-  - bundle exec rake test
