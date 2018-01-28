@@ -6,6 +6,10 @@
 #include <list>
 #include <ostream>
 #include <string>
+#include <set>
+#include <sstream>
+#include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 enum class ex_type { number, ident, binop, define, block, ret, undefined };
@@ -102,6 +106,26 @@ struct expression {
   }
 
   void addParam(expression &&expr) { params.push_back(std::move(expr)); }
+
+  template <typename V>
+  void visit(V &v) const
+  {
+    v(*this);
+    for (auto &ex : params)
+      ex.visit(v);
+  }
+
+  // get all the variable names, defined inside here
+  std::set<std::string> varSet() const
+  {
+    std::set<std::string> vars;
+    auto add = [&vars](const expression &e) {
+      if (e.type == ex_type::define)
+        vars.insert(e.ident);
+    };
+    visit(add);
+    return vars;
+  }
 };
 
 std::ostream &print(std::ostream &out, const expression &e, int indent = 1)
@@ -136,6 +160,10 @@ std::ostream &print(std::ostream &out, const expression &e, int indent = 1)
       for (int i = 0; i < indent - 1; i++)
         out << ' ';
     }
+    break;
+  case ex_type::ret:
+    out << " return: ";
+    print(out, *e.params.begin());
     break;
   default:
     out << "type: " << e.type << " has no printer";
