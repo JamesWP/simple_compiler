@@ -9,6 +9,7 @@
 %code requires
 {
 #include "ast.hpp"
+#include "codegen.h"
 
 struct lexcontext;
 
@@ -107,7 +108,9 @@ namespace yy { calc_parser::symbol_type yylex(lexcontext& ctx); }
 %%
 
 go: { ctx.newScope(); } stmt { ctx.closeScope();
-                               std::cout << $2 << '\n'; }
+                               if(ctx.verb > 1) std::cout << $2 << '\n' << '\n'; 
+                               Stream s($2); 
+                               std::cout << s.str(); }
 
 stmt:
     expr error               { $$ = -1; }
