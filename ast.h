@@ -14,7 +14,7 @@
 
 enum class ex_type { number, ident, binop, define, block, ret, undefined };
 
-std::ostream &operator<<(std::ostream &out, ex_type t)
+inline std::ostream &operator<<(std::ostream &out, ex_type t)
 {
   switch (t) {
   case ex_type::number:
@@ -36,7 +36,7 @@ std::ostream &operator<<(std::ostream &out, ex_type t)
 
 enum class op_type { add, minus, multiply, divide, assign, undefined };
 
-std::ostream &operator<<(std::ostream &out, op_type t)
+inline std::ostream &operator<<(std::ostream &out, op_type t)
 {
   switch (t) {
   case op_type::add:
@@ -128,7 +128,7 @@ struct expression {
   }
 };
 
-std::ostream &print(std::ostream &out, const expression &e, int indent = 1)
+inline std::ostream &print(std::ostream &out, const expression &e, int indent = 1)
 {
   out << '(' << e.type << ' ';
   switch (e.type) {
@@ -172,7 +172,7 @@ std::ostream &print(std::ostream &out, const expression &e, int indent = 1)
   return (out << ')');
 }
 
-std::ostream &operator<<(std::ostream &out, const expression &e)
+inline std::ostream &operator<<(std::ostream &out, const expression &e)
 {
   return print(out, e);
 }

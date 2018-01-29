@@ -10,6 +10,7 @@
 {
 #include "ast.h"
 #include "codegen.h"
+#include "frontend.h"
 
 struct lexcontext;
 
@@ -220,19 +221,13 @@ void yy::calc_parser::error(const location_type& l, const std::string& message)
               << l.end.column << ":" << message << '\n';
 }
 
-#include <fstream>
-
-int main(int argc, char* argv[])
+void parse(std::istream& input, std::string inputName, int verb)
 {
-    if(argc < 2) return 1;
-    std::string infile(argv[1]);
-    std::ifstream input(infile);
-    if(!input)    return 2;
     std::string buffer(std::istreambuf_iterator<char>(input), {});
 
     lexcontext ctx;
 
-    if(argc >= 3) ctx.verb = std::atoi(argv[2]); 
+    ctx.verb = verb; 
 
     if(ctx.verb > 0){
       std::cout << "input:\n";
@@ -240,8 +235,8 @@ int main(int argc, char* argv[])
     }
 
     ctx.cursor = buffer.c_str();
-    ctx.loc.begin.filename = &infile;
-    ctx.loc.end.filename   = &infile;
+    ctx.loc.begin.filename = &inputName;
+    ctx.loc.end.filename   = &inputName;
 
     yy::calc_parser parser(ctx);
 
