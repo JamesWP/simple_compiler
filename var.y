@@ -8,7 +8,7 @@
 
 %code requires
 {
-#include "ast.hpp"
+#include "ast.h"
 #include "codegen.h"
 
 struct lexcontext;

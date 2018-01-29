@@ -1,7 +1,7 @@
 #ifndef CODEGEN
 #define CODEGEN
 
-#include "ast.hpp"
+#include "ast.h"
 #include "codegen_x86.h"
 
 #include <cassert>

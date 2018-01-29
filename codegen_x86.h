@@ -1,6 +1,9 @@
 #ifndef CODEGEN_x86
 #define CODEGEN_x86
 
+#include <iostream>
+#include <sstream>
+
 class StreamL1 {
   std::ostringstream out;
 
