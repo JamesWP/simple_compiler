@@ -10,4 +10,4 @@ jobs:
           command: apt-get update -q && apt-get install -y bison re2c g++ gcc binutils build-essential cmake
       - run:
           name: Make
-          command: make clean test
+          command: mkdir bld && cd bld && cmake -GNinja .. && cmake --build .
