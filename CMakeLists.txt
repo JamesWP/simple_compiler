@@ -7,18 +7,28 @@ PROJECT(SimpleCompiler)
   SET(CMAKE_CXX_EXTENSIONS OFF)
 
   ADD_CUSTOM_COMMAND(
-    OUTPUT var.cpp
+    OUTPUT frontend.cpp
 
-    COMMAND bison -o var.cpp.1 "${CMAKE_SOURCE_DIR}/var.y" -t --report=all
-    COMMAND sed -f "${CMAKE_SOURCE_DIR}/move.sed" -i ${MOVE_SED} var.cpp.1
-    COMMAND re2c var.cpp.1 -o var.cpp
-    COMMAND rm var.cpp.1
+    COMMAND bison -o frontend.cpp.1 "${CMAKE_SOURCE_DIR}/frontend.y" -t --report=all
+    COMMAND sed -f "${CMAKE_SOURCE_DIR}/move.sed" -i ${MOVE_SED} frontend.cpp.1
+    COMMAND re2c frontend.cpp.1 -o frontend.cpp
+    COMMAND rm frontend.cpp.1
 
-    MAIN_DEPENDENCY var.y move.sed
+    MAIN_DEPENDENCY frontend.y move.sed
 
-    COMMENT "Generating var.cpp"
+    COMMENT "Generating frontend.cpp"
   )
+
+  ADD_CUSTOM_TARGET(
+    GenerateFrontend
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/frontend.cpp
+  )
+
+  ADD_LIBRARY(SimpleCompiler.dummy SimpleCompiler.cpp)
+  ADD_DEPENDENCIES(SimpleCompiler.dummy GenerateFrontend)
 
   ADD_DEFINITIONS(-Wall -Wpedantic)  
   INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}")
-  ADD_EXECUTABLE(SimpleCompiler var.cpp)
+  ADD_EXECUTABLE(SimpleCompiler frontend.cpp codegen.cpp codegen_x86.cpp)
+  TARGET_LINK_LIBRARIES(SimpleCompiler SimpleCompiler.dummy)
+
