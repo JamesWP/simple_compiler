@@ -9,7 +9,7 @@ PROJECT(SimpleCompiler)
   ADD_CUSTOM_COMMAND(
     OUTPUT var.cpp
 
-    COMMAND bison -o var.cpp.1 "${CMAKE_SOURCE_DIR}/var.y"
+    COMMAND bison -o var.cpp.1 "${CMAKE_SOURCE_DIR}/var.y" -t --report=all
     COMMAND sed -f "${CMAKE_SOURCE_DIR}/move.sed" -i ${MOVE_SED} var.cpp.1
     COMMAND re2c var.cpp.1 -o var.cpp
     COMMAND rm var.cpp.1
@@ -18,6 +18,7 @@ PROJECT(SimpleCompiler)
 
     COMMENT "Generating var.cpp"
   )
-  
+
+  ADD_DEFINITIONS(-Wall -Wpedantic)  
   INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}")
   ADD_EXECUTABLE(SimpleCompiler var.cpp)
