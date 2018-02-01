@@ -91,7 +91,7 @@ namespace yy { calc_parser::symbol_type yylex(lexcontext& ctx); }
 } // %code
 
 %token END 0
-%token VAR "var" RETURN "return"
+%token VAR "var" RETURN "return" IF "if" ELSE "else"
 %token NUMBERCONST
 %token IDENTIFIER
 
@@ -99,6 +99,9 @@ namespace yy { calc_parser::symbol_type yylex(lexcontext& ctx); }
 %left '+' '-'
 %left '*' '/'
 %left '('
+
+%right ')'
+%right ELSE 
 
 %type<int>            NUMBERCONST
 %type<std::string>    IDENTIFIER
@@ -109,7 +112,7 @@ namespace yy { calc_parser::symbol_type yylex(lexcontext& ctx); }
 %%
 
 go: { ctx.newScope(); } stmt { ctx.closeScope();
-                               if(ctx.verb > 1) std::cout << $2 << '\n' << '\n'; 
+                               if(ctx.verb>1) std::cout << $2 << '\n' << '\n'; 
                                Stream s($2); 
                                std::cout << s.str(); }
 
@@ -123,6 +126,9 @@ stmt:
                                $$ = expression(std::move($2), std::move($4)); }
 |   "var" IDENTIFIER ';'     { ctx.defineVar($2, *this); 
                                $$ = expression(std::move($2), expression()); }
+|   "if" '(' expr ')' stmt   { $$ = expression(ex_type::cond, std::move($3), std::move($5)); }
+|   "if" '(' expr ')' stmt "else" stmt 
+                             { $$ = expression(ex_type::cond, std::move($3), std::move($5), std::move($7)); }
 |   "return" expr ';'        { $$ = expression(ex_type::ret, std::move($2)); }
 ;
 
@@ -161,6 +167,16 @@ re2c:define:YYCURSOR = "ctx.cursor";
 {
     ctx.loc.columns(ctx.cursor - anchor);
     return calc_parser::make_RETURN(ctx.loc);
+}
+"if"
+{
+    ctx.loc.columns(ctx.cursor - anchor);
+    return calc_parser::make_IF(ctx.loc);
+}
+"else"
+{
+    ctx.loc.columns(ctx.cursor - anchor);
+    return calc_parser::make_ELSE(ctx.loc);
 }
 "var"
 {

@@ -52,6 +52,14 @@ public:
   void swap() { out << "  xchg eax,edx\n"; }
   void ret() { out << "  ret" << '\n'; }
 
+  void jumpIfZero(const std::string &label)
+  {
+    out << "  cmp eax, 0\n";
+    out << "  jz " << label << '\n';
+  }
+  void jump(const std::string &label) { out << "  jmp " << label << '\n'; }
+  void label(const std::string &label) { out << label << ':' << '\n'; }
+
   void filePreamble() { out << "  .intel_syntax noprefix\n"; }
   void funcitonPreamble(const char *fname)
   {

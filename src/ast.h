@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-enum class ex_type { number, ident, binop, define, block, ret, undefined };
+enum class ex_type { number, ident, binop, define, block, ret, cond, undefined };
 
 inline std::ostream &operator<<(std::ostream &out, ex_type t)
 {
@@ -29,6 +29,8 @@ inline std::ostream &operator<<(std::ostream &out, ex_type t)
     return (out << "BLK");
   case ex_type::ret:
     return (out << "RET");
+  case ex_type::cond:
+    return (out << "CND");
   case ex_type::undefined:;
   }
   return (out << "UNKNOWN");
@@ -83,7 +85,26 @@ struct expression {
     addParam(std::move(val));
   }
 
-  expression(ex_type t, expression &&e) : type(t) { addParam(std::move(e)); }
+  expression(ex_type t, expression&& e)
+  : type(t)
+  {
+      addParam(std::move(e));
+  }
+
+  expression(ex_type t, expression&& e1, expression&& e2)
+  : type(t)
+  {
+      addParam(std::move(e1));
+      addParam(std::move(e2));
+  }
+
+  expression(ex_type t, expression&& e1, expression&& e2, expression&& e3)
+  : type(t)
+  {
+      addParam(std::move(e1));
+      addParam(std::move(e2));
+      addParam(std::move(e3));
+  }
 
   expression(expr_list &&exprs) : type(ex_type::block), params(std::move(exprs))
   {
@@ -165,6 +186,35 @@ inline std::ostream &print(std::ostream &out, const expression &e, int indent = 
     out << " return: ";
     print(out, *e.params.begin());
     break;
+  case ex_type::cond: {
+    auto cond = e.params.begin();
+    auto trExp = ++e.params.begin();
+    auto faExp = ++++e.params.begin();
+
+    out << "IF ";
+    print(out, *cond, indent+1);
+
+    out << '\n';
+    if (indent > 0) {
+      for (int i = 0; i < indent; i++)
+        out << ' ';
+    }
+
+    out << " TRUE:  ";
+    print(out, *trExp, indent+1);
+
+    out << '\n';
+    if (indent > 0) {
+      for (int i = 0; i < indent; i++)
+        out << ' ';
+    }
+  
+    if(faExp != e.params.end()){
+        out << " FALSE: ";
+        print(out, *faExp);
+    }
+    out << " ENDIF";
+  } break;
   default:
     out << "type: " << e.type << " has no printer";
   }
