@@ -10,7 +10,7 @@ class Stream {
   StreamL1 out;
 
 public:
-  Stream(const expression& e)
+  Stream(const expression &e)
   {
     out.filePreamble();
     out.funcitonPreamble("do_thing");
@@ -22,7 +22,7 @@ public:
 
   const std::string str() { return out.str(); }
 
-private:  
+private:
   void emit_constant(int val) { out.assignAcc(val); }
   void emit_load(const std::string &name)
   {
@@ -58,6 +58,7 @@ private:
   }
 
   std::unordered_map<std::string, int> variable_offset_map;
+  uint32_t labNo = 0;
 
   void emit_stack_frame_push(const std::set<std::string> &vars)
   {
@@ -75,6 +76,29 @@ private:
   {
     out.popn(variable_offset_map.size());
     out.restoreFp();
+  }
+
+  std::string getNextLabel(const char* name)
+  {
+    std::ostringstream lab;
+    lab << name;
+    lab << labNo++;
+    return lab.str();
+  }
+
+  void emit_cond_jump(const std::string& label) 
+  {
+    out.jumpIfZero(label);
+  }
+
+  void emit_label(const std::string& label)
+  {
+    out.label(label);
+  }
+  
+  void emit_jump(const std::string& label)
+  {
+    out.jump(label);
   }
 
   void emit(const expression &expr)
@@ -106,8 +130,8 @@ private:
       }
       else {
         auto opIt = expr.params.begin();
-        auto& firstOp = *opIt++;
-        auto& secondOp = *opIt;
+        auto &firstOp = *opIt++;
+        auto &secondOp = *opIt;
         emit(firstOp);
         emit_swap();
         emit(secondOp);
@@ -132,6 +156,29 @@ private:
       return;
     case ex_type::undefined:
       return;
+    case ex_type::cond: {
+      auto epr = expr.params.begin();
+      emit(*epr++);
+
+      auto falseLabel = getNextLabel("false");
+      auto endLabel = getNextLabel("end");
+
+      emit_cond_jump(falseLabel);
+      emit(*epr++);
+
+      if (epr != expr.params.end()) { // we have a false
+        emit_jump(endLabel);
+        emit_label(falseLabel);
+        emit(*epr);
+        emit_label(endLabel);
+      }
+      else {
+        emit_label(falseLabel);
+      }
+    }
+      return;
+    default:
+      assert(false);
     }
   }
 };
