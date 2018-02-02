@@ -1,4 +1,7 @@
 #include "frontend.h"
+#include "codegen.h"
+#include "display.h"
+
 #include <fstream>
 
 int main(int argc, char* argv[])
@@ -8,5 +11,11 @@ int main(int argc, char* argv[])
     std::ifstream input(infile);
     if(!input)    return 2;
 
-    parse(input);
+    expression e = parse(input);
+    if (argc > 1) {
+      printExpressionTree(std::cout, e);
+    }
+
+    //Stream s(e);
+    //std::cout << s.str();
 }

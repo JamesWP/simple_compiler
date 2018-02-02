@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: apt-get update -q && apt-get install -y bison re2c g++ gcc binutils build-essential cmake ninja-build
+          command: apt-get update -q && apt-get install -y bison re2c g++ gcc binutils build-essential cmake ninja-build git
       - run:
           name: Make
           command: mkdir bld && cd bld && cmake -GNinja .. && cmake --build .

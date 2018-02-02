@@ -1,4 +1,16 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+INCLUDE(ExternalProject)
+
+ExternalProject_Add(
+    textbox
+    PREFIX ${CMAKE_BINARY_DIR}/textbox
+    GIT_REPOSITORY https://gist.github.com/e7e4e07edc84a99284e8f43f7fb6badc.git
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+)
+ExternalProject_Get_Property(textbox source_dir)
+set(TextboxIncludeDir ${source_dir})
 
 PROJECT(SimpleCompiler)
 
@@ -29,7 +41,10 @@ PROJECT(SimpleCompiler)
   ADD_DEPENDENCIES(SimpleCompiler.dummy GenerateFrontend)
 
   ADD_DEFINITIONS(-Wall -Wpedantic)  
+  
   INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src")
-  ADD_EXECUTABLE(SimpleCompiler src/SimpleCompiler.cpp src/codegen.cpp src/codegen_x86.cpp)
+  INCLUDE_DIRECTORIES("${TextboxIncludeDir}")
+  
+  ADD_EXECUTABLE(SimpleCompiler src/SimpleCompiler.cpp src/codegen.cpp src/codegen_x86.cpp src/display.cpp)
   TARGET_LINK_LIBRARIES(SimpleCompiler SimpleCompiler.dummy)
 
