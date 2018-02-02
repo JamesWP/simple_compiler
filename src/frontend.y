@@ -53,6 +53,8 @@ struct symbol_table
 
 struct lexcontext
 {
+    expression result;
+
     int verb = 0;
     const char* cursor;
     yy::location loc;
@@ -112,9 +114,7 @@ namespace yy { calc_parser::symbol_type yylex(lexcontext& ctx); }
 %%
 
 go: { ctx.newScope(); } stmt { ctx.closeScope();
-                               if(ctx.verb>1) std::cout << $2 << '\n' << '\n'; 
-                               Stream s($2); 
-                               std::cout << s.str(); }
+                               ctx.result = std::move($2); }
 
 stmt:
     expr error               { $$ = -1; }
@@ -237,7 +237,7 @@ void yy::calc_parser::error(const location_type& l, const std::string& message)
               << l.end.column << ":" << message << '\n';
 }
 
-void parse(std::istream& input, std::string inputName, int verb)
+expression parse(std::istream& input, std::string inputName, int verb)
 {
     std::string buffer(std::istreambuf_iterator<char>(input), {});
 
@@ -257,6 +257,8 @@ void parse(std::istream& input, std::string inputName, int verb)
     yy::calc_parser parser(ctx);
 
     parser.parse();
+
+    return std::move(ctx.result);
 }
 
 // vim: set syntax=cpp:
