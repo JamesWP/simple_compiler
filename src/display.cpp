@@ -69,7 +69,7 @@ std::ostream& printExpressionTree(std::ostream& out, const expression& e)
   };
 
   textbox t = create_tree_graph<decltype(e.params)::const_iterator>(
-      e, 100, creator, counter, one_liner, simple, sep_first);
+      e, 80, creator, counter, one_liner, simple, sep_first);
 
   out << t.to_string();
  
