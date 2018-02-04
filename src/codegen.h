@@ -38,8 +38,6 @@ private:
   }
   void emit_return() { out.ret(); }
 
-  void emit_swap() { out.swap(); }
-
   void emit_op(op_type opType)
   {
     // ops are in acc, and tmp
@@ -62,20 +60,16 @@ private:
 
   void emit_stack_frame_push(const std::set<std::string> &vars)
   {
-    int size = vars.size();
     int offset = 1;
     for (auto &var : vars) {
       variable_offset_map[var] = offset++;
     }
-    out.saveFp();
-    out.pushn(size);
-    out.setupStack();
+    out.setupStack(vars.size());
   }
 
   void emit_stack_frame_pop()
   {
-    out.popn(variable_offset_map.size());
-    out.restoreFp();
+    out.restoreStack();
   }
 
   std::string getNextLabel(const char* name)
@@ -99,6 +93,21 @@ private:
   void emit_jump(const std::string& label)
   {
     out.jump(label);
+  }
+
+  void emit_push()
+  {
+    out.push();
+  }
+
+  void emit_pop_tmp()
+  {
+    out.popTmp();
+  }
+
+  void emit_swap()
+  {
+    out.swap();
   }
 
   void emit(const expression &expr)
@@ -133,8 +142,9 @@ private:
         auto &firstOp = *opIt++;
         auto &secondOp = *opIt;
         emit(firstOp);
-        emit_swap();
+        emit_push();
         emit(secondOp);
+        emit_pop_tmp();
         emit_swap();
         emit_op(expr.otype);
       }
