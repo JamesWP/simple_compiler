@@ -65,9 +65,9 @@ struct lexcontext
     void useVar(const std::string& var, Parser& p)
     {
         if(sym.isDefined(var)) return;
-        std::string ermsg="variable used but not defined: ";
+        std::string ermsg="variable used but not defined: '";
         ermsg += var;
-        ermsg += ". assuming defined here";
+        ermsg += "'. assuming defined here";
         p.error(loc, ermsg.c_str());
         sym.define(var);
     }
@@ -76,8 +76,9 @@ struct lexcontext
     void defineVar(const std::string& var, Parser& p)
     {
         if(sym.isDefined(var)) {
-            std::string ermsg = "variable already defined: ";
+            std::string ermsg = "variable already defined: '";
             ermsg += var;
+            ermsg += "'";
             p.error(loc, ermsg.c_str());
             return;
         }
@@ -151,6 +152,9 @@ expr:
 
 %%
 
+#include <iterator>
+#include <algorithm>
+
 yy::calc_parser::symbol_type yy::yylex(lexcontext& ctx)
 {
     const char* anchor = ctx.cursor;
@@ -203,6 +207,24 @@ re2c:define:YYCURSOR = "ctx.cursor";
 {
     ctx.loc.columns(ctx.cursor - anchor);
     return calc_parser::make_END(ctx.loc);
+}
+"/*" ([^*] | ("*" [^/]))* "*""/"
+{
+    const std::string cmt{anchor, ctx.cursor};
+    
+    size_t lines = std::count(begin(cmt), end(cmt), '\n'); 
+
+    ctx.loc.lines(lines);
+
+    if (lines > 0) {
+      const char* lastNL = &(*(std::find(rbegin(cmt), rend(cmt), '\n')));
+      size_t cols = std::distance(lastNL, &(*cmt.end())) - 1;
+      std::cout << "lines:" << lines << "cols:" << cols << '\n';
+      ctx.loc.columns(cols);
+    }
+    else
+      ctx.loc.columns(cmt.size());
+    return yylex(ctx);
 }
 "\r\n" | [\r\n]
 {
