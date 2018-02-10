@@ -2,3 +2,5 @@
 *.d
 *.prog
 re2c/
+bld
+.*.swp
