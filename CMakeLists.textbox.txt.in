@@ -1,0 +1,15 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.2)
+
+PROJECT(textbox-download NONE)
+
+INCLUDE(ExternalProject)
+ExternalProject_Add(
+    textbox
+    GIT_REPOSITORY https://gist.github.com/e7e4e07edc84a99284e8f43f7fb6badc.git
+    GIT_TAG master
+    SOURCE_DIR "${CMAKE_BINARY_DIR}/textbox-src"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    TEST_COMMAND ""
+)

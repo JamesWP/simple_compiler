@@ -4,6 +4,7 @@
 
 - [bison](https://www.gnu.org/software/bison/) - parser generator
 - [re2c](http://re2c.org/) - lexer generator
+- [gtest](https://github.com/google/googletest) - unit test framework
 - [cmake](https://cmake.org/) - build
 
 ## building
@@ -12,4 +13,5 @@ $ mkdir bld
 $ cd bld
 $ cmake -GNinja ..
 $ cmake --build .
+$ ctest
 ```
